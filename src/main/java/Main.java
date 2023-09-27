@@ -1,3 +1,4 @@
+import com.mysema.query.SearchResults;
 import com.mysema.query.jpa.impl.JPAQuery;
 import entity.Member;
 
@@ -58,5 +59,33 @@ public class Main {
             - singleResult() : uniqueResult()와 같지만 결과가 하나 이상이면 처음 데이터를 반환
             - list() : 결과가 하나 이상일 때 사용한다. 결과가 없으면 빈 컬렉션 반환
          */
+
+        /*
+            4. 페이징과 정렬
+
+             정렬은 orderBy를 사용하는데 쿼리 타입(Q)이 제공하는 asc(), desc()를 사용한다.
+             페이징은 offset과 limit를 적절히 조합해서 사용하면 된다.
+
+         */
+        QItem item = QItem.item;
+
+        query.from(item)
+                .where(item.price.gt(2000))
+                .orderBy(item.price.desc(), item.stockQuantity.asc())
+                .offset(10).limit(20)
+                .list(item);
+
+        // 실제 페이징 처리를 하려면 검색된 전체 데이터 수를 알아야 한다.
+        // 이 때는 list() 대신에 listResults()를 사용한다.
+        SearchResults<Item> result =
+                query.from(item)
+                        .where(item.price.get(10000))
+                        .offset(10).limit(20)
+                        .listResults(item);
+
+        long total = result.getTotal(); // 검색된 전체 데이터 수
+        long limit = result.getLimit();
+        long offset = result.getOffset();
+        List<Item> results = result.getResults();
     }
 }
