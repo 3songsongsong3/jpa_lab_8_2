@@ -1,4 +1,5 @@
 import com.mysema.query.SearchResults;
+import com.mysema.query.jpa.JPASubQuery;
 import com.mysema.query.jpa.impl.JPAQuery;
 import entity.Member;
 
@@ -134,6 +135,34 @@ public class Main {
                 .where(order.member.eq(member))
                 .list(order);
 
+        /*
+            7. 서브 쿼리
+
+             서브 쿼리는 com.mysema.query.jpa.JPASubQuery를 생성해서 사용한다.
+            서브 쿼리의 결과가 하나면 unique(), 여러 건이면 list()를 사용한다.
+         */
+
+        // 한 건
+        QItem item = QItem.item;
+        QItem itemSub = new QItem("itemSub");
+
+        query.from(item)
+                .where(item.price.eq(
+                        new JPASubQuery().from(itemSub).unique(itemSub.price.max())
+                ))
+                .list(item);
+
+        // 여러 건
+        QItem item = QItem.item;
+        QItem itemSub = new QItem("itemSub");
+
+        query.from(item)
+                .where(item.in(
+                        new JPASubQuery().from(itemSub)
+                                .where(item.name.eq(itemSub.name))
+                                .list(itemSub)
+                ))
+                .list(item);
 
     }
 }
