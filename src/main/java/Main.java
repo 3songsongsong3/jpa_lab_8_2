@@ -1,6 +1,8 @@
 import com.mysema.query.SearchResults;
 import com.mysema.query.jpa.JPASubQuery;
+import com.mysema.query.jpa.impl.JPADeleteClause;
 import com.mysema.query.jpa.impl.JPAQuery;
+import com.mysema.query.jpa.impl.JPAUpdateClause;
 import entity.Member;
 
 import javax.persistence.EntityManager;
@@ -190,5 +192,24 @@ public class Main {
             System.out.println("name = " + tuple.get(item.name));
             System.out.println("name = " + tuple.get(item.price));
         }
+        /*
+            9. 수정, 삭제 배치 쿼리
+
+             QueryDSL도 수정, 삭제 같은 배치 쿼리를 지원한다.
+             ** JPQL 배치 쿼리와 같이 영속성 컨텍스트를 무시하고 데이터베이스를 직접 쿼리한다는 점에 유의!
+         */
+        // 수정 쿼리 com.mysema.query.jpa.impl.JPAUpdateClause를 사용
+        QItem item = QItem.item;
+        JPAUpdateClause updateClause = new JPAUpdateClause(em, item);
+        long count = updateClause.where(item.name.eq("시골 개발자의 JPA"))
+                .set(item.price, item.price.add(100))
+                .execute();
+        // 삭제 쿼리 com.mysema.query.jpa.impl.JPADeleteClause를 사용
+        QItem item = QItem.item;
+        JPADeleteClause deleteClause = new JPADeleteClause(em, item);
+        long count2 = deleteClause.where(item.name.eq("시골 개발자의 JPA"))
+                .execute();
+
+
     }
 }
