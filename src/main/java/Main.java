@@ -6,6 +6,7 @@ import entity.Member;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import java.sql.SQLOutput;
 import java.util.List;
 
 public class Main {
@@ -164,5 +165,30 @@ public class Main {
                 ))
                 .list(item);
 
+        /*
+            8. 프로젝션과 결과 반환
+
+         */
+        // 프로젝션 대상이 하나
+        // item.name <- 해당 타입으로 반환한다.
+        QItem item = QItem.item;
+        List<String> result = query.from(item).list(item.name);
+
+        for (String name : result) {
+            System.out.println("name = " + name);
+        }
+        // 여러 컬럼 반환과 튜플
+        // 프로젝션 대상으로 여러 필드를 선택하면 QueryDSL은 기본으로 com.mysema.query.Tuple이라는
+        // Map과 비슷한 내부 타입을 사용한다.
+        // 조회 결과는 tuple.get() 메소드에 조회한 쿼리 타입을 지정하면 된다.
+        QItem item = QItem.item;
+
+        List<Tuple> result = query.from(item).list(item.name, item.price);
+        // List<Tuple> result = query.from(item).list(new QTuple(item.name, item.price)); 와 같다
+
+        for (Tuple tuple : result) {
+            System.out.println("name = " + tuple.get(item.name));
+            System.out.println("name = " + tuple.get(item.price));
+        }
     }
 }
