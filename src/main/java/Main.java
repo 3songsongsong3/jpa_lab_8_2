@@ -87,5 +87,53 @@ public class Main {
         long limit = result.getLimit();
         long offset = result.getOffset();
         List<Item> results = result.getResults();
+
+        /*
+            5. 그룹
+
+            그룹화는 groupBy를 사용하고 결과를 제한하려면 having을 사용하면 된다.
+         */
+        query.from(item)
+                .groupBy(item.price)
+                .having(item.price.gt(1000))
+                .list(item);
+
+        /*
+            6. 조인
+
+             조인은 innerJoin, leftJoin, rightJoin, fullJoin을 사용할 수 있고
+            JPQL의 on과 성능 최적화를 위한 fetch 조인도 사용할 수 있다.
+
+             조인의 기본 문법은 첫 번째 파라미터에 조인 대상을 지정하고,
+            두 번째 파라미터에 별칭으로 사용할 쿼리 타입을 지정하면 된다.
+
+            join(조인 대상, 별칭으로 사용할 쿼리 타입)
+         */
+        // 기본적인 조인 방법
+        QOrder order = QOrder.order;
+        QMember member = QMember.member;
+        QOrderItem orderItem = QOrderItem.orderItem;
+
+        query.from(order)
+                .join(order.member, member)
+                .leftJoin(order.orderItems, orderItem)
+                .list(order);
+
+        // 조인 on 사용
+        query.from(order)
+                .leftJoin(order.orderItem, orderItem)
+                .on(orderItem.count.gt(2))
+                .list(order);
+        // 페치 조인
+        query.from(order)
+                .innerJoin(order.member, member).fetch()
+                .leftJoin(order.orderItems, orderItem).fetch()
+                .list(order);
+        // from절에 여러 조인을 사용하는 세타 조인
+        query.from(order, member)
+                .where(order.member.eq(member))
+                .list(order);
+
+
     }
 }
