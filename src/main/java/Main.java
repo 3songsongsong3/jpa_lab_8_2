@@ -1,3 +1,4 @@
+import com.mysema.query.BooleanBuilder;
 import com.mysema.query.SearchResults;
 import com.mysema.query.jpa.JPASubQuery;
 import com.mysema.query.jpa.impl.JPADeleteClause;
@@ -210,6 +211,27 @@ public class Main {
         long count2 = deleteClause.where(item.name.eq("시골 개발자의 JPA"))
                 .execute();
 
+        /*
+            10. 동적 쿼리
 
+             com.mysema.query.BooleanBuilder를 사용하면 특정 조건에 따른 동적 쿼리를 편리하게 작성할 수 있다.
+         */
+
+        SearchParam param = new SearchParam();
+        param.setName("시골개발자");
+        param.setPrice(1000);
+
+        QItem item = QItem.item;
+
+        BooleanBuilder builder = new BooleanBuilder();
+        if (StringUtils.hasNext(param.getName())) {
+            builder.and(item.name.contains(param.getName()));
+        }
+        if (param.getPrice() != null) {
+            builder.and(item.price.gt(param.getPrice()));
+        }
+        List<Item> result = query.from(item)
+                .where(builder)
+                .list(item);
     }
 }
